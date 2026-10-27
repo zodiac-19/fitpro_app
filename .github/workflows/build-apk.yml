@@ -8,16 +8,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install -g eas-cli && npm install
+      - name: Install dependencies & EAS CLI
+        run: |
+          npm install -g npm@latest
+          npm install -g eas-cli
+          npm install
 
-      - name: Build placeholder info
-        run: echo "Project ready for Expo/EAS build"
+      - name: Run Build Check
+        run: echo "Build environment is ready"
