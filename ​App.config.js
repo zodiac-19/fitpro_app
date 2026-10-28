@@ -10,7 +10,7 @@ export default ({ config }) => ({
   icon: './assets/icon.png',
   splash: { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#090A12' },
   android: {
-    package: 'com.yourcompany.fitpro', // change before your first Play Store upload
+    package: 'com.zodiac.fitpro', // change before your first Play Store upload
     versionCode: 1,
     adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#090A12' },
     permissions: ['CAMERA'],
