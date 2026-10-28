@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Fitpro",
+    "slug": "fitpro",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.zodiac.fitpro"
+    }
+  }
+}
