@@ -20,6 +20,7 @@ export default ({ config }) => ({
   permissions: ['CAMERA']
 },
 
+
   plugins: [
     [
       'expo-image-picker',
