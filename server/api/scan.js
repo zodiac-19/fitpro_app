@@ -29,7 +29,7 @@ Use 50 for muscles that are not visible. Average untrained adult = about 40-50, 
       type: [0, 1, 2].includes(r.type) ? r.type : 1,
       scores,
     });
-  } catch (e) {
+      } catch (e) {
+    console.error('SCAN_ERROR', e.message);
     return res.status(502).json({ error: 'analysis_failed' });
   }
-}
