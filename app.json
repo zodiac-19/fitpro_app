@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#090A12"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,13 +19,27 @@
       "package": "com.zodiac.fitpro",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#090A12"
+      },
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "extra": {
       "eas": {
         "projectId": "1155e455-6299-4659-8566-a7f4f31537eff"
       }
-    }
+    },
+    "scheme": "fitpro",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
+          "cameraPermission": "Fitpro needs the camera to scan your physique and verify progress."
+        }
+      ]
+    ]
   }
 }
