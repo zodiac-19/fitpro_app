@@ -16,6 +16,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'yarn'
 
       - name: Setup Expo
         uses: expo/expo-github-action@v8
@@ -23,8 +24,10 @@ jobs:
           expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
+      - name: Install dependencies & EAS CLI
+        run: |
+          yarn install
+          yarn global add eas-cli
 
       - name: Run EAS Build
         run: eas build --platform android --profile production --non-interactive
