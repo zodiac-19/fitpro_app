@@ -1,8 +1,6 @@
 name: Build APK with EAS Cloud
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -16,18 +14,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'yarn'
 
-      - name: Setup Expo
+      - name: Setup Expo & EAS
         uses: expo/expo-github-action@v8
         with:
           expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Install dependencies & EAS CLI
-        run: |
-          yarn install
-          yarn global add eas-cli
+      - name: Install Project Dependencies
+        run: npm install --legacy-peer-deps
 
-      - name: Run EAS Build
+      - name: Build Android APK
         run: eas build --platform android --profile production --non-interactive
