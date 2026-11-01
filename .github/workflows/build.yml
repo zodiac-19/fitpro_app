@@ -27,8 +27,9 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Android APK
+    - name: Generate Android Folder and Build APK
       run: |
+        npx expo prebuild --platform android --clean
         cd android
         chmod +x gradlew
         ./gradlew assembleRelease
