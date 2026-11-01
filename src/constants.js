@@ -1,2 +1,2 @@
 export const STORAGE_KEY = 'fitpro:state:v1';
-export const SHARE_BASE = 'fitpro.app/join/'; // change to your own domain/deep link when you have one
+export const SHARE_BASE = 'fitpro://join/'; // app deep link (scheme set in app.json); the code is also sent as plain text
