@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { useI18n } from '../i18n';
 import { isVerifyConfigured, verifyPhotos } from '../services/verification';
 import { Bar, Btn, Card, Muted } from '../components/UI';
+import { fmt } from '../i18n';
 import { C, R } from '../theme';
 import { goalLabel, goalProgress } from '../utils/fitness';
 
@@ -21,14 +22,15 @@ export default function GoalsScreen() {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) return setError(t.perm);
     // Camera only (no library) makes it harder to submit an old photo.
-    const res = await ImagePicker.launchCameraAsync({ quality: 0.5, base64: true });
+    const res = await ImagePicker.launchCameraAsync({ quality: 0.4, base64: true, allowsEditing: true, aspect: [3, 4] });
     if (res.canceled || !res.assets?.[0]?.base64) return undefined;
     const after = res.assets[0].base64;
     setBusy(index);
     try {
-      const ok = await verifyPhotos(s.baseB64, after);
-      if (ok) verifyGoal(index, after);
-      else setError(t.pvf);
+      const r = await verifyPhotos(s.baseB64, after, s.goals[index].t);
+      if (r.verified) verifyGoal(index, after);
+      else if (!r.valid) setError(t.inv[r.reason] || t.pvf);
+      else setError(fmt(t.vn, { n: r.bodyFat, t: s.goals[index].t }));
     } catch (e) {
       setError(t.pvf);
     } finally {
@@ -64,7 +66,7 @@ export default function GoalsScreen() {
                   ? <Text style={{ color: C.volt, textAlign: 'center' }}>{t.cp}</Text>
                   : <Btn label={`📷 ${t.vf}`} onPress={() => verify(i)} disabled={!configured || busy !== null} outline />
               ) : null}
-              {photo && !configured ? <Muted style={align}>{t.pv}</Muted> : null}
+              {photo && !configured ? <Muted style={align}>{t.sv}</Muted> : null}
             </Card>
           );
         })}
