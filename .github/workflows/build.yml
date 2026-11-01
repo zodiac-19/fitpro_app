@@ -34,57 +34,49 @@ jobs:
 
       - name: Put every file in its right folder
         run: |
-          set -e
-          # Finds a file by name (any letter case, any folder) and moves it to its place.
-          place() {
-            name="$1"
-            target="$2"
-            if [ -f "$target" ]; then return 0; fi
-            found=$(find . -maxdepth 1 -type f -iname "$name" | head -n 1)
-            if [ -z "$found" ]; then
-              found=$(find . -type f -iname "$name" -not -path './.git/*' -not -path './node_modules/*' -not -path './android/*' | head -n 1)
-            fi
-            if [ -n "$found" ]; then
-              mkdir -p "$(dirname "$target")"
-              git mv -f "$found" "$target" 2>/dev/null || mv "$found" "$target"
-              echo "moved $found -> $target"
-            fi
+          node <<'NODE'
+          const { execFileSync } = require('child_process');
+          const fs = require('fs');
+          const path = require('path');
+
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
+          // Compare names ignoring letter case, spaces, "(1)" suffixes and invisible characters.
+          const norm = (f) => path.basename(f).normalize('NFKC')
+            .replace(/\s*\(\d+\)/g, '').replace(/[^A-Za-z0-9._-]/g, '').toLowerCase();
+
+          const targets = [
+            'App.js', 'package.json', 'app.json', 'babel.config.js', 'metro.config.js',
+            'src/constants.js', 'src/theme.js', 'src/i18n/index.js', 'src/i18n/strings.js',
+            'src/context/AppContext.js', 'src/utils/fitness.js', 'src/components/UI.js',
+            'src/components/MuscleMap.js', 'src/services/firebase.js', 'src/services/bodyScan.js',
+            'src/services/squadService.js', 'src/services/verification.js', 'src/hooks/useSquad.js',
+            'src/screens/HomeScreen.js', 'src/screens/PlanScreen.js', 'src/screens/GoalsScreen.js',
+            'src/screens/SquadScreen.js', 'src/screens/OnboardingScreen.js',
+          ];
+
+          const files = git('ls-files', '-z').split('\0').filter(Boolean)
+            .filter((f) => !/^(\.github|node_modules|android|ios)\//.test(f));
+
+          for (const target of targets) {
+            if (fs.existsSync(target)) continue;
+            const found = files
+              .filter((f) => f !== target && norm(f) === norm(target))
+              .sort((a, b) => a.split('/').length - b.split('/').length)[0];
+            if (found) {
+              fs.mkdirSync(path.dirname(target), { recursive: true });
+              git('mv', '-f', found, target);
+              console.log('moved ' + JSON.stringify(found) + ' -> ' + target);
+            }
           }
-          place babel.config.js babel.config.js
-          place metro.config.js metro.config.js
-          place constants.js src/constants.js
-          place theme.js src/theme.js
-          place index.js src/i18n/index.js
-          place strings.js src/i18n/strings.js
-          place appcontext.js src/context/AppContext.js
-          place fitness.js src/utils/fitness.js
-          place ui.js src/components/UI.js
-          place musclemap.js src/components/MuscleMap.js
-          place firebase.js src/services/firebase.js
-          place bodyscan.js src/services/bodyScan.js
-          place squadservice.js src/services/squadService.js
-          place verification.js src/services/verification.js
-          place usesquad.js src/hooks/useSquad.js
-          place homescreen.js src/screens/HomeScreen.js
-          place planscreen.js src/screens/PlanScreen.js
-          place goalsscreen.js src/screens/GoalsScreen.js
-          place squadscreen.js src/screens/SquadScreen.js
-          place onboardingscreen.js src/screens/OnboardingScreen.js
-          missing=0
-          for f in App.js babel.config.js metro.config.js package.json app.json \
-            src/constants.js src/theme.js src/i18n/index.js src/i18n/strings.js \
-            src/context/AppContext.js src/utils/fitness.js src/components/UI.js \
-            src/components/MuscleMap.js src/services/firebase.js src/services/bodyScan.js \
-            src/services/squadService.js src/services/verification.js src/hooks/useSquad.js \
-            src/screens/HomeScreen.js src/screens/PlanScreen.js src/screens/GoalsScreen.js \
-            src/screens/SquadScreen.js src/screens/OnboardingScreen.js; do
-            if [ ! -f "$f" ]; then echo "::error::Missing file: $f"; missing=1; fi
-          done
-          if [ "$missing" = "1" ]; then
-            echo "Files that exist in the repository:"
-            git ls-files
-            exit 1
-          fi
+
+          const missing = targets.filter((f) => !fs.existsSync(f));
+          if (missing.length) {
+            console.log('::error::Missing: ' + missing.join(', '));
+            console.log('::error::Files in the repository: ' + git('ls-files').trim().split('\n').join(' | '));
+            process.exit(1);
+          }
+          console.log('All files are in place');
+          NODE
 
       - name: Create app images and complete app.json
         run: |
