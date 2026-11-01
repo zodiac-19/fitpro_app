@@ -91,7 +91,8 @@ function ScanStep({ profile, done }) {
       setResult(res);
       setPhase('result');
     } catch (e) {
-      setMessage(t.fail);
+      setMessage(e.message === 'not_configured' ? t.sv : (t.inv[e.message] || t.fail));
+      setUri(null);
       setPhase('error');
     } finally {
       timers.forEach(clearTimeout);
@@ -131,7 +132,7 @@ function ScanStep({ profile, done }) {
             <Card style={{ flex: 1 }}><Muted>{t.bf}</Muted><Text style={s.stat}>{result.bodyFat}%</Text></Card>
             <Card style={{ flex: 1 }}><Muted>{t.ty}</Muted><Text style={s.stat}>{t.tp[result.type]}</Text></Card>
           </View>
-          {result.source === 'estimate' ? <Muted style={{ textAlign: 'center' }}>{t.es}</Muted> : null}
+          <Muted style={{ textAlign: 'center' }}>{t.es}</Muted>
           <Btn label={t.pl} onPress={() => done(result, b64)} />
         </View>
       ) : null}
@@ -140,7 +141,6 @@ function ScanStep({ profile, done }) {
         <View style={{ gap: 10, marginTop: 16 }}>
           <Btn label={t.cam} onPress={() => pick(true)} />
           <Btn label={t.lib} onPress={() => pick(false)} outline />
-          <Btn label={t.skip} onPress={() => run(null)} outline />
         </View>
       ) : null}
     </ScrollView>
