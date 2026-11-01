@@ -35,31 +35,41 @@ jobs:
       - name: Put every file in its right folder
         run: |
           set -e
-          mv_if() {
-            if [ -f "$1" ]; then
-              mkdir -p "$(dirname "$2")"
-              git mv -f "$1" "$2"
-              echo "moved $1 -> $2"
+          # Finds a file by name (any letter case, any folder) and moves it to its place.
+          place() {
+            name="$1"
+            target="$2"
+            if [ -f "$target" ]; then return 0; fi
+            found=$(find . -maxdepth 1 -type f -iname "$name" | head -n 1)
+            if [ -z "$found" ]; then
+              found=$(find . -type f -iname "$name" -not -path './.git/*' -not -path './node_modules/*' -not -path './android/*' | head -n 1)
+            fi
+            if [ -n "$found" ]; then
+              mkdir -p "$(dirname "$target")"
+              git mv -f "$found" "$target" 2>/dev/null || mv "$found" "$target"
+              echo "moved $found -> $target"
             fi
           }
-          mv_if Babel.config.js babel.config.js
-          mv_if Metro.config.js metro.config.js
-          mv_if Constants.js src/constants.js
-          mv_if Theme.js src/theme.js
-          mv_if Index.js src/i18n/index.js
-          mv_if Strings.js src/i18n/strings.js
-          mv_if AppContext.js src/context/AppContext.js
-          mv_if Fitness.js src/utils/fitness.js
-          mv_if UI.js src/components/UI.js
-          mv_if MuscleMap.js src/components/MuscleMap.js
-          mv_if Firebase.js src/services/firebase.js
-          mv_if BodyScan.js src/services/bodyScan.js
-          mv_if SquadService.js src/services/squadService.js
-          mv_if Verification.js src/services/verification.js
-          mv_if UseSquad.js src/hooks/useSquad.js
-          for s in Home Plan Goals Squad Onboarding; do
-            mv_if "${s}Screen.js" "src/screens/${s}Screen.js"
-          done
+          place babel.config.js babel.config.js
+          place metro.config.js metro.config.js
+          place constants.js src/constants.js
+          place theme.js src/theme.js
+          place index.js src/i18n/index.js
+          place strings.js src/i18n/strings.js
+          place appcontext.js src/context/AppContext.js
+          place fitness.js src/utils/fitness.js
+          place ui.js src/components/UI.js
+          place musclemap.js src/components/MuscleMap.js
+          place firebase.js src/services/firebase.js
+          place bodyscan.js src/services/bodyScan.js
+          place squadservice.js src/services/squadService.js
+          place verification.js src/services/verification.js
+          place usesquad.js src/hooks/useSquad.js
+          place homescreen.js src/screens/HomeScreen.js
+          place planscreen.js src/screens/PlanScreen.js
+          place goalsscreen.js src/screens/GoalsScreen.js
+          place squadscreen.js src/screens/SquadScreen.js
+          place onboardingscreen.js src/screens/OnboardingScreen.js
           missing=0
           for f in App.js babel.config.js metro.config.js package.json app.json \
             src/constants.js src/theme.js src/i18n/index.js src/i18n/strings.js \
@@ -70,7 +80,11 @@ jobs:
             src/screens/SquadScreen.js src/screens/OnboardingScreen.js; do
             if [ ! -f "$f" ]; then echo "::error::Missing file: $f"; missing=1; fi
           done
-          [ "$missing" = "0" ] || exit 1
+          if [ "$missing" = "1" ]; then
+            echo "Files that exist in the repository:"
+            git ls-files
+            exit 1
+          fi
 
       - name: Create app images and complete app.json
         run: |
