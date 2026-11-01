@@ -31,12 +31,12 @@ export async function askVision(prompt, photos) {
 export const MUSCLES = ['chest', 'shoulders', 'biceps', 'triceps', 'forearms', 'abs', 'lats', 'traps', 'glutes', 'quads', 'hamstrings', 'calves'];
 
 export const GATE = `
-First decide if the photo is usable. Return {"valid": false, "reason": R} when:
-- no real, live human body is in the photo (paper, cardboard, objects, animals, drawings, a face-only selfie): R = "not_person"
-- a person is there but the torso (chest, shoulders, waist) is not clearly visible or is hidden by baggy clothes, or it is too dark/blurry/cropped: R = "not_body" (use "quality" for dark/blurry)
-- the person looks younger than 18: R = "minor"
-- it is a screenshot, a photo of a screen/printed picture, or a stock/edited image rather than a live photo: R = "not_live"
-Never guess on an unusable photo.`;
+First decide if the photo is usable. Be very lenient.
+Return {"valid": false, "reason": R} ONLY when:
+- no real person is visible (paper, cardboard, objects, animals, drawings, or only a close-up of a face): R = "not_person"
+- no part of the body below the face can be seen at all: R = "quality"
+Every other photo of a human is valid: any age, any clothing (shirtless, fitted, loose, jacket), any pose, any lighting, gallery or camera.
+The more of the body is visible and the clearer the photo, the more precise the estimate must be. When the photo shows less detail (clothes, distance, angle), still give a full estimate using the visible shape plus the user's age, weight and height, and use 50 for any muscle you cannot judge.`;
 
 export const cors = (res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
