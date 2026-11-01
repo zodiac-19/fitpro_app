@@ -1,28 +1,181 @@
-name: Build APK with EAS Cloud
+name: Build APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+env:
+  EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+  EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+  EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+  EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+  EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+  EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
 
 jobs:
-  build:
+  apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
-      - name: Setup Expo & EAS
-        uses: expo/expo-github-action@v8
+      - uses: actions/setup-java@v4
         with:
-          expo-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          distribution: temurin
+          java-version: 17
 
-      - name: Install Project Dependencies
-        run: npm install --legacy-peer-deps
+      - name: Put every file in its right folder
+        run: |
+          set -e
+          mv_if() {
+            if [ -f "$1" ]; then
+              mkdir -p "$(dirname "$2")"
+              git mv -f "$1" "$2"
+              echo "moved $1 -> $2"
+            fi
+          }
+          mv_if Babel.config.js babel.config.js
+          mv_if Metro.config.js metro.config.js
+          mv_if Constants.js src/constants.js
+          mv_if Theme.js src/theme.js
+          mv_if Index.js src/i18n/index.js
+          mv_if Strings.js src/i18n/strings.js
+          mv_if AppContext.js src/context/AppContext.js
+          mv_if Fitness.js src/utils/fitness.js
+          mv_if UI.js src/components/UI.js
+          mv_if MuscleMap.js src/components/MuscleMap.js
+          mv_if Firebase.js src/services/firebase.js
+          mv_if BodyScan.js src/services/bodyScan.js
+          mv_if SquadService.js src/services/squadService.js
+          mv_if Verification.js src/services/verification.js
+          mv_if UseSquad.js src/hooks/useSquad.js
+          for s in Home Plan Goals Squad Onboarding; do
+            mv_if "${s}Screen.js" "src/screens/${s}Screen.js"
+          done
+          missing=0
+          for f in App.js babel.config.js metro.config.js package.json app.json \
+            src/constants.js src/theme.js src/i18n/index.js src/i18n/strings.js \
+            src/context/AppContext.js src/utils/fitness.js src/components/UI.js \
+            src/components/MuscleMap.js src/services/firebase.js src/services/bodyScan.js \
+            src/services/squadService.js src/services/verification.js src/hooks/useSquad.js \
+            src/screens/HomeScreen.js src/screens/PlanScreen.js src/screens/GoalsScreen.js \
+            src/screens/SquadScreen.js src/screens/OnboardingScreen.js; do
+            if [ ! -f "$f" ]; then echo "::error::Missing file: $f"; missing=1; fi
+          done
+          [ "$missing" = "0" ] || exit 1
 
-      - name: Build Android APK
-        run: eas build --platform android --profile production --non-interactive
+      - name: Create app images and complete app.json
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const zlib = require('zlib');
+          fs.mkdirSync('assets', { recursive: true });
+
+          function png(w, h, paint) {
+            const stride = w * 4 + 1;
+            const raw = Buffer.alloc(stride * h);
+            for (let y = 0; y < h; y++) {
+              for (let x = 0; x < w; x++) {
+                const c = paint(x, y);
+                const o = y * stride + 1 + x * 4;
+                raw[o] = c[0]; raw[o + 1] = c[1]; raw[o + 2] = c[2]; raw[o + 3] = 255;
+              }
+            }
+            const chunk = (type, data) => {
+              const b = Buffer.alloc(12 + data.length);
+              b.writeUInt32BE(data.length, 0);
+              b.write(type, 4);
+              data.copy(b, 8);
+              b.writeUInt32BE(zlib.crc32(b.subarray(4, 8 + data.length)) >>> 0, 8 + data.length);
+              return b;
+            };
+            const ihdr = Buffer.alloc(13);
+            ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4); ihdr[8] = 8; ihdr[9] = 6;
+            return Buffer.concat([
+              Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+              chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0)),
+            ]);
+          }
+
+          const BG = [9, 10, 18];
+          const VOLT = [61, 242, 224];
+          const inRect = (u, v, x, y, w, h) => u >= x && u < x + w && v >= y && v < y + h;
+          const mark = (pad) => (x, y) => {
+            const k = 1024 / (1024 - 2 * pad);
+            const u = (x - pad) * k;
+            const v = (y - pad) * k;
+            const on = inRect(u, v, 312, 252, 84, 520) || inRect(u, v, 312, 252, 400, 84) || inRect(u, v, 312, 468, 300, 80);
+            return on ? VOLT : BG;
+          };
+          const make = (file, pad) => {
+            if (!fs.existsSync(file)) fs.writeFileSync(file, png(1024, 1024, mark(pad)));
+          };
+          make('assets/icon.png', 0);
+          make('assets/adaptive-icon.png', 160);
+          make('assets/splash.png', 200);
+
+          const j = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          const e = j.expo || (j.expo = {});
+          e.name = e.name || 'Fitpro';
+          e.slug = e.slug || 'fitpro';
+          e.version = e.version || '1.0.0';
+          e.orientation = 'portrait';
+          e.scheme = e.scheme || 'fitpro';
+          e.icon = './assets/icon.png';
+          e.splash = { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#090A12' };
+          e.android = e.android || {};
+          e.android.package = e.android.package || 'com.zodiac.fitpro';
+          e.android.versionCode = e.android.versionCode || 1;
+          e.android.adaptiveIcon = { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#090A12' };
+          e.android.permissions = ['CAMERA'];
+          e.plugins = (e.plugins || []).filter((p) => (Array.isArray(p) ? p[0] : p) !== 'expo-image-picker');
+          e.plugins.push(['expo-image-picker', {
+            photosPermission: 'Fitpro needs your photos to analyze your physique and verify progress.',
+            cameraPermission: 'Fitpro needs the camera to scan your physique and verify progress.',
+          }]);
+          fs.writeFileSync('app.json', JSON.stringify(j, null, 2) + '\n');
+
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.main = 'node_modules/expo/AppEntry.js';
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          console.log('app.json, package.json and images are ready');
+          NODE
+
+      - name: Save the tidy structure to the repository
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Organize project structure (automated)"
+            git push
+          fi
+
+      - name: Install dependencies
+        run: |
+          npm install --legacy-peer-deps
+          npx expo install --fix -- --legacy-peer-deps || true
+
+      - name: Create the Android project
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build the APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitpro-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
