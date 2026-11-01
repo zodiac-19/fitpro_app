@@ -1,24 +1,28 @@
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
-
-const image = (b64) => ({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } });
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 export async function askVision(prompt, photos) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-goog-api-key': process.env.GEMINI_API_KEY,
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            ...photos.map((b64) => ({ inline_data: { mime_type: 'image/jpeg', data: b64 } })),
+            { text: prompt },
+          ],
+        }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+      }),
     },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 600,
-      messages: [{ role: 'user', content: [...photos.map(image), { type: 'text', text: prompt }] }],
-    }),
-  });
-  if (!res.ok) throw new Error(`anthropic_${res.status}`);
+  );
+  if (!res.ok) throw new Error(`gemini_${res.status}`);
   const data = await res.json();
-  const text = (data.content || []).map((c) => c.text || '').join('');
+  const text = (data.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('');
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) throw new Error('bad_model_output');
   return JSON.parse(m[0]);
