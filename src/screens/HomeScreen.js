@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { fmt, useI18n } from '../i18n';
 import MuscleMap from '../components/MuscleMap';
+import AdBanner from '../components/AdBanner';
 import { Bar, Btn, Card, Chip, Muted } from '../components/UI';
 import { C, R } from '../theme';
 import {
@@ -116,6 +117,7 @@ export default function HomeScreen() {
             );
           })}
         </Card>
+       <AdBanner />   
       </ScrollView>
       <CoachModal visible={coach} onClose={() => setCoach(false)} s={s} t={t} />
     </SafeAreaView>
