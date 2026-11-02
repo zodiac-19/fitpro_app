@@ -39,6 +39,13 @@
           "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
           "cameraPermission": "Fitpro needs the camera to scan your physique and verify progress."
         }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3143960924694698-1851533544",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
       ]
     ]
   }
