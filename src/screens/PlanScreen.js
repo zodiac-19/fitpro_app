@@ -13,6 +13,7 @@ import {
 
 export default function PlanScreen() {
   const { state: s, addEntry, toggleEntry, removeEntry, finish, addMeal, removeMeal } = useApp();
+  useEffect(() => { prepareInterstitial(); }, []);
   const { t, row, align } = useI18n();
   const [day, setDay] = useState(todayIndex());
   const [draft, setDraft] = useState({ name: '', reps: '', kg: '', m: null });
