@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { useI18n } from '../i18n';
 import { Bar, Btn, Card, Chip, Field, Muted } from '../components/UI';
 import { NetChip } from './HomeScreen';
+import { prepareInterstitial, showInterstitial } from '../services/interstitial';
 import { C, R } from '../theme';
 import {
   burnedDay, calorieTarget, DAY_MUSCLES, DAY_TYPES, eaten, proteinEaten, r1, sessionCount, todayIndex,
