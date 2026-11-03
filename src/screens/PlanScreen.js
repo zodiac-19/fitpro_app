@@ -1,5 +1,5 @@
-import Schedule from '../components/Schedule';
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -12,26 +12,62 @@ import {
   burnedDay, calorieTarget, DAY_MUSCLES, DAY_TYPES, eaten, proteinEaten, r1, sessionCount, todayIndex,
 } from '../utils/fitness';
 
+// 0 push, 1 pull, 2 legs, 3 rest, 4 upper body, 5 lower body
+const OPTIONS = [0, 1, 2, 4, 5, 3];
+const NAMES_EN = ['Push', 'Pull', 'Legs', 'Rest', 'Upper body', 'Lower body'];
+const NAMES_AR = ['Push', 'Pull', 'Legs', 'راحة', 'الجزء العلوي', 'الجزء السفلي'];
+
+const unite = (a, b) => a.concat(b.filter((m) => !a.includes(m)));
+const musclesOf = (y) => {
+  if (y === 4) return unite(DAY_MUSCLES[0] || [], DAY_MUSCLES[1] || []);
+  if (y === 5) return DAY_MUSCLES[2] || [];
+  return DAY_MUSCLES[y] || [];
+};
+
 export default function PlanScreen() {
   const { state: s, addEntry, toggleEntry, removeEntry, finish, addMeal, removeMeal } = useApp();
   useEffect(() => { prepareInterstitial(); }, []);
   const { t, row, align } = useI18n();
+  const rtl = align.textAlign === 'right';
+  const nameOf = (y) => (y < 3 && t.d1 && t.d1[y]) || (rtl ? NAMES_AR : NAMES_EN)[y];
+
+  const [types, setTypes] = useState(Array.from(DAY_TYPES));
+  const [editing, setEditing] = useState(false);
+  const [tmp, setTmp] = useState(Array.from(DAY_TYPES));
+  useEffect(() => {
+    AsyncStorage.getItem('fitpro_schedule').then((v) => {
+      if (!v) return;
+      const a = JSON.parse(v);
+      if (Array.isArray(a) && a.length === DAY_TYPES.length) setTypes(a);
+    }).catch(() => {});
+  }, []);
   const [day, setDay] = useState(todayIndex());
   const [draft, setDraft] = useState({ name: '', reps: '', kg: '', m: null });
   const [meal, setMeal] = useState({ n: '', k: '', p: '' });
   const [msg, setMsg] = useState('');
   const [fmsg, setFmsg] = useState('');
 
-  const type = DAY_TYPES[day];
-  const muscles = DAY_MUSCLES[type];
+  const type = types[day];
+  const muscles = musclesOf(type);
   const muscle = muscles.includes(draft.m) ? draft.m : muscles[0];
+  const typeDesc = (type < 3 && t.dm && t.dm[type]) || muscles.map((m) => t.m[m]).join(' · ');
   const log = s.log[day] || [];
   const ticked = log.filter((e) => e.tick).length;
-  const pending = log.filter((e) => e.tick && !e.fin).length;
   const target = calorieTarget(s);
   const meals = s.meals[day] || [];
   const proteinTarget = Math.round(+s.profile.weight * 2);
   const L = s.last && s.last.d === day ? s.last : null;
+  const pending = log.filter((e) => e.tick && !e.fin).length;
+
+  const startEdit = () => { setTmp(types.slice()); setEditing(true); };
+  const saveEdit = () => {
+    setTypes(tmp);
+    AsyncStorage.setItem('fitpro_schedule', JSON.stringify(tmp)).catch(() => {});
+    setEditing(false);
+    setMsg('');
+  };
+  const cancelEdit = () => setEditing(false);
+  const pick = (i, y) => setTmp(tmp.map((v, k) => (k === i ? y : v)));
 
   const onAdd = () => {
     const reps = Math.round(+draft.reps);
@@ -40,7 +76,7 @@ export default function PlanScreen() {
     setDraft({ name: '', reps: '', kg: '', m: muscle });
     return setMsg('');
   };
-    const onFinish = () => {
+  const onFinish = () => {
     if (!pending) return setMsg(t.tk);
     finish(day);
     showInterstitial();
@@ -60,19 +96,42 @@ export default function PlanScreen() {
         <ScrollView contentContainerStyle={st.pad} keyboardShouldPersistTaps="handled">
           <View style={[st.between, row]}>
             <Text style={st.h1}>{t.pn}</Text>
+            <Pressable onPress={editing ? cancelEdit : startEdit} style={st.editBtn}>
+              <Text style={{ color: C.volt, fontSize: 13, fontWeight: '700' }}>
+                {editing ? '✕' : (rtl ? 'تعديل الجدول' : 'Edit schedule')}
+              </Text>
+            </Pressable>
             <Muted>{t.ses}: {sessionCount(s)}/6</Muted>
           </View>
 
+          {editing ? (
+            <Card>
+              {tmp.map((y, i) => (
+                <View key={i} style={{ gap: 6 }}>
+                  <Text style={[st.h3, align]}>{t.wd[i]}</Text>
+                  <View style={[st.wrap, row]}>
+                    {OPTIONS.map((o) => (
+                      <Chip key={o} label={nameOf(o)} active={y === o} onPress={() => pick(i, o)} />
+                    ))}
+                  </View>
+                </View>
+              ))}
+              <Pressable onPress={saveEdit} style={st.saveBtn} accessibilityLabel="save">
+                <Text style={{ color: C.bg, fontSize: 22, fontWeight: '800' }}>✔️</Text>
+              </Pressable>
+            </Card>
+          ) : null}
+
           <Card>
             <View style={[st.between, row]}>
-              {DAY_TYPES.map((y, i) => {
+              {types.map((y, i) => {
                 const on = i === day;
                 const done = !!s.fin[i];
                 return (
                   <Pressable key={i} onPress={() => { setDay(i); setMsg(''); }} style={{ alignItems: 'center', flex: 1 }}>
                     <Text style={{ color: on ? C.volt : C.mute, fontSize: 11 }}>{t.wd[i]}</Text>
                     <View style={[st.dayDot, { borderColor: on ? C.volt : C.edge, backgroundColor: done ? C.volt : 'transparent' }]}>
-                      <Text style={{ color: done ? C.bg : C.text, fontSize: 12 }}>{done ? '✓' : y === 3 ? '–' : t.d1[y].slice(0, 1)}</Text>
+                      <Text style={{ color: done ? C.bg : C.text, fontSize: 12 }}>{done ? '✓' : y === 3 ? '–' : y === 4 ? 'U' : y === 5 ? 'L' : nameOf(y).slice(0, 1)}</Text>
                     </View>
                   </Pressable>
                 );
@@ -86,10 +145,10 @@ export default function PlanScreen() {
             <>
               <View>
                 <View style={[st.between, row]}>
-                  <Text style={st.h2}>{t.d1[type]}</Text>
+                  <Text style={st.h2}>{nameOf(type)}</Text>
                   <Text style={{ color: C.volt }}>{ticked}/{log.length}</Text>
                 </View>
-                <Muted style={align}>{t.dm[type]}</Muted>
+                <Muted style={align}>{typeDesc}</Muted>
               </View>
 
               {log.length ? log.map((e) => (
@@ -195,4 +254,6 @@ const st = StyleSheet.create({
   plus: { width: 54, borderWidth: 1.5, borderColor: C.volt, borderRadius: R.md, alignItems: 'center', justifyContent: 'center' },
   pill: { borderWidth: 1, borderRadius: R.pill, paddingHorizontal: 10, paddingVertical: 3 },
   meal: { backgroundColor: C.bg, borderRadius: R.sm, padding: 10, alignItems: 'center', gap: 10 },
+  editBtn: { borderWidth: 1, borderColor: C.volt, borderRadius: R.pill, paddingHorizontal: 12, paddingVertical: 5 },
+  saveBtn: { backgroundColor: C.volt, borderRadius: R.md, paddingVertical: 10, alignItems: 'center', justifyContent: 'center' },
 });
