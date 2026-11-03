@@ -39,9 +39,10 @@ export default function PlanScreen() {
     setDraft({ name: '', reps: '', kg: '', m: muscle });
     return setMsg('');
   };
-  const onFinish = () => {
+    const onFinish = () => {
     if (!pending) return setMsg(t.tk);
     finish(day);
+    showInterstitial();
     return setMsg('');
   };
   const onMeal = () => {
