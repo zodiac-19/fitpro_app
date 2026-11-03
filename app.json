@@ -4,7 +4,7 @@
     "slug": "fitpro",
     "version": "1.0.0",
     "runtimeVersion": { "policy": "appVersion" },
-    "updates": { "url": "https://u.expo.dev/1155e455-6299-4659-8566-a7f4f31537eff" },
+    "updates": { "url": "https://u.expo.dev/1133e458-6299-4b50-8b66-a7f825327eff" },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -30,7 +30,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1155e455-6299-4659-8566-a7f4f31537eff"
+        "projectId": "1133e458-6299-4b50-8b66-a7f825327eff"
       }
     },
     "scheme": "fitpro",
