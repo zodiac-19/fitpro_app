@@ -3,6 +3,8 @@
     "name": "Fitpro",
     "slug": "fitpro",
     "version": "1.0.0",
+    "runtimeVersion": { "policy": "appVersion" },
+    "updates": { "url": "https://u.expo.dev/1155e455-6299-4659-8566-a7f4f31537eff" },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -44,9 +46,4 @@
         "expo-image-picker",
         {
           "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
-          "cameraPermission": "Fitpro needs the camera to scan your physique and verify progress."
-        }
-      ]
-    ]
-  }
-}
+          "cameraPermis
