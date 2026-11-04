@@ -1,0 +1,36 @@
+name: Publish update
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Update description"
+        default: "update"
+
+env:
+  EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+  EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+  EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+  EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+  EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+  EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+  EXPO_PUBLIC_SCAN_URL: ${{ secrets.SCAN_URL }}
+  EXPO_PUBLIC_VERIFY_URL: ${{ secrets.VERIFY_URL }}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm install --legacy-peer-deps
+      - run: npx expo install --fix -- --legacy-peer-deps || true
+      - run: eas channel:create production --non-interactive || true
+      - run: eas update --channel production --platform android --message "$MSG" --non-interactive
+        env:
+          MSG: ${{ inputs.message }}
