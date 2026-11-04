@@ -3,8 +3,12 @@
     "name": "Fitpro",
     "slug": "fitpro",
     "version": "1.0.0",
-    "runtimeVersion": { "policy": "appVersion" },
-    "updates": { "url": "https://u.expo.dev/1133e458-6299-4b50-8b66-a7f825327eff" },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1133e458-6299-4b50-8b66-a7f825327eff"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,7 +28,9 @@
         "backgroundColor": "#090A12"
       },
       "versionCode": 1,
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "extra": {
       "eas": {
@@ -43,8 +49,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Fitpro needs your photos to verify progress.",
-          "cameraPermission": "Fitpro needs the camera to verify progress."
+          "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
+          "cameraPermission": "Fitpro needs the camera to scan your physique and verify progress."
         }
       ]
     ]
