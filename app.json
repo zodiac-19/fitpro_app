@@ -4,10 +4,10 @@
     "slug": "fitpro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon (1).png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash (1).png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#090A12"
     },
@@ -18,7 +18,7 @@
     "android": {
       "package": "com.zodiac.fitpro",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon (2).png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#090A12"
       },
       "versionCode": 1,
