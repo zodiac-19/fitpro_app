@@ -24,9 +24,7 @@
         "backgroundColor": "#090A12"
       },
       "versionCode": 1,
-      "permissions": [
-        "CAMERA"
-      ]
+      "permissions": ["CAMERA"]
     },
     "extra": {
       "eas": {
@@ -45,5 +43,10 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
-          "cameraPermis
+          "photosPermission": "Fitpro needs your photos to verify progress.",
+          "cameraPermission": "Fitpro needs the camera to verify progress."
+        }
+      ]
+    ]
+  }
+}
