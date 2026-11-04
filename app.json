@@ -44,7 +44,3 @@
       ]
     ]
   }
-}
-"icon": "./assets/icon (1).png",
-"splash": { "image": "./assets/splash (1).png", "resizeMode": "contain", "backgroundColor": "#000000" },
-"android": { "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon (2).png", "backgroundColor": "#000000" } }
