@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#090A12"
       },
-      "versionCode": 85,
+      "versionCode": 86,
       "permissions": [
         "CAMERA"
       ]
