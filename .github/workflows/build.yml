@@ -17,6 +17,9 @@ env:
   EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
   EXPO_PUBLIC_SCAN_URL: ${{ secrets.SCAN_URL }}
   EXPO_PUBLIC_VERIFY_URL: ${{ secrets.VERIFY_URL }}
+  KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+  KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
 jobs:
   apk:
@@ -141,7 +144,8 @@ jobs:
           e.splash = { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#090A12' };
           e.android = e.android || {};
           e.android.package = e.android.package || 'com.zodiac.fitpro';
-          e.android.versionCode = e.android.versionCode || 1;
+          // Each build gets a higher versionCode (required by app stores for updates)
+          e.android.versionCode = Number(process.env.GITHUB_RUN_NUMBER || 1);
           e.android.adaptiveIcon = { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#090A12' };
           e.android.permissions = ['CAMERA'];
           e.plugins = (e.plugins || []).filter((p) => (Array.isArray(p) ? p[0] : p) !== 'expo-image-picker');
@@ -175,11 +179,40 @@ jobs:
       - name: Create the Android project
         run: npx expo prebuild --platform android --no-install
 
+      - name: Sign with release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::No keystore secret, APK will be signed with the debug key"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          node <<'NODE'
+          const fs = require('fs');
+          const f = 'android/app/build.gradle';
+          let g = fs.readFileSync(f, 'utf8');
+          g = g.replace(/(release\s*\{[^}]*?)signingConfig signingConfigs\.debug/, '$1signingConfig signingConfigs.release');
+          g = g.replace('signingConfigs {', `signingConfigs {
+              release {
+                  storeFile file('release.keystore')
+                  storePassword System.getenv('KEYSTORE_PASSWORD')
+                  keyAlias System.getenv('KEY_ALIAS')
+                  keyPassword System.getenv('KEY_PASSWORD')
+              }`);
+          if (!g.includes('signingConfigs.release')) {
+            console.log('::error::Could not patch build.gradle');
+            process.exit(1);
+          }
+          fs.writeFileSync(f, g);
+          console.log('release signing configured');
+          NODE
+
       - name: Build the APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
 
       - name: Upload the APK
         uses: actions/upload-artifact@v4
