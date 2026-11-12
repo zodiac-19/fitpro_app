@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Fitpro",
-    "slug": "fitpro",
+    "name": "sportyfit",
+    "slug": "sportyfit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +26,7 @@
         "CAMERA"
       ]
     },
-    "scheme": "fitpro",
+    "scheme": "sportyfit",
     "plugins": [
       [
         "react-native-google-mobile-ads",
@@ -38,8 +38,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Fitpro needs your photos to analyze your physique and verify progress.",
-          "cameraPermission": "Fitpro needs the camera to scan your physique and verify progress."
+          "photosPermission": "sportyfit needs your photos to analyze your physique and verify progress.",
+          "cameraPermission": "sportyfit needs the camera to scan your physique and verify progress."
         }
       ]
     ]
