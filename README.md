@@ -1,4 +1,4 @@
-# Fitpro App
+# sportyfit App
 Fitness and workout app built with React Native and Expo.
 
 The app needs two backends. Both are free to start and are read from build-time secrets
