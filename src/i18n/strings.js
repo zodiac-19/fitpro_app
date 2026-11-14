@@ -8,7 +8,7 @@ export const LANGS = [
 const en = {
   inv: { not_person: 'No person detected. Take a photo of your body, not an object.', not_body: 'Your torso is not clearly visible. Stand straight, shirtless or in fitted clothes, in good light.', minor: 'Body analysis is for adults only.', not_live: 'Please take a new live photo (no screenshots or photos of screens).', quality: 'The photo is too dark or blurry. Try again.' },
   sv: 'The analysis service is not set up yet.', vn: 'Estimated body fat: {n}%. Target: {t}%. Keep going!', vx: 'Analyzing your photo…',
-  ti: 'Fitpro — your way to be a pro.', su: 'Pick your language to begin.', co: 'Continue',
+  ti: 'sportyfit — your way to be a pro.', su: 'Pick your language to begin.', co: 'Continue',
   pr: 'Tell us about you', na: 'Name', ag: 'Age', we: 'Weight (kg)', he: 'Height (cm)', err: 'Fill in all fields correctly.',
   sc: 'Scan your physique', ss: 'Take a photo of your body to estimate your level and get a better experience.',
   cam: 'Take photo', lib: 'Choose from library',
@@ -42,7 +42,7 @@ const en = {
 const ar = {
   inv: { not_person: 'لم يتم اكتشاف شخص. صوّر جسمك وليس شيئاً آخر.', not_body: 'الجذع غير واضح. قف باستقامة بدون قميص أو بلباس ملتصق وفي إضاءة جيدة.', minor: 'تحليل الجسم للبالغين فقط.', not_live: 'التقط صورة حية جديدة (بدون لقطات شاشة أو صور لشاشات).', quality: 'الصورة مظلمة أو غير واضحة. حاول مجدداً.' },
   sv: 'خدمة التحليل غير مفعّلة بعد.', vn: 'نسبة الدهون المقدّرة: {n}%. الهدف: {t}%. واصل!', vx: 'جارٍ تحليل صورتك…',
-  ti: 'فيتبرو — طريقك لتكون محترفاً.', su: 'اختر لغتك للبدء.', co: 'متابعة',
+  ti: 'سبورتيفيت — طريقك لتكون محترفاً.', su: 'اختر لغتك للبدء.', co: 'متابعة',
   pr: 'عرّفنا بنفسك', na: 'الاسم', ag: 'العمر', we: 'الوزن (كغ)', he: 'الطول (سم)', err: 'املأ كل الحقول بشكل صحيح.',
   sc: 'امسح جسمك', ss: 'صوّر جسمك لتقدير مستواك والحصول على تجربة أفضل.',
   cam: 'التقط صورة', lib: 'اختر من المعرض',
@@ -76,7 +76,7 @@ const ar = {
 const fr = {
   inv: { not_person: 'Aucune personne détectée. Photographie ton corps, pas un objet.', not_body: 'Ton buste n’est pas bien visible. Tiens-toi droit, torse nu ou en tenue ajustée, avec une bonne lumière.', minor: 'L’analyse corporelle est réservée aux adultes.', not_live: 'Prends une nouvelle photo en direct (pas de capture d’écran ni de photo d’écran).', quality: 'Photo trop sombre ou floue. Réessaie.' },
   sv: 'Le service d’analyse n’est pas encore configuré.', vn: 'Masse grasse estimée : {n}%. Objectif : {t}%. Continue !', vx: 'Analyse de ta photo…',
-  ti: 'Fitpro — ta voie pour devenir un pro.', su: 'Choisis ta langue pour commencer.', co: 'Continuer',
+  ti: 'sportyfit — ta voie pour devenir un pro.', su: 'Choisis ta langue pour commencer.', co: 'Continuer',
   pr: 'Parle-nous de toi', na: 'Prénom', ag: 'Âge', we: 'Poids (kg)', he: 'Taille (cm)', err: 'Remplis correctement tous les champs.',
   sc: 'Scanne ton physique', ss: 'Photographie ton corps pour estimer ton niveau et profiter d’une meilleure expérience.',
   cam: 'Prendre une photo', lib: 'Choisir dans la galerie',
@@ -110,7 +110,7 @@ const fr = {
 const es = {
   inv: { not_person: 'No se detectó ninguna persona. Fotografía tu cuerpo, no un objeto.', not_body: 'Tu torso no se ve bien. Ponte recto, sin camiseta o con ropa ajustada y buena luz.', minor: 'El análisis corporal es solo para adultos.', not_live: 'Toma una foto nueva en directo (sin capturas ni fotos de pantallas).', quality: 'La foto es muy oscura o borrosa. Inténtalo de nuevo.' },
   sv: 'El servicio de análisis aún no está configurado.', vn: 'Grasa corporal estimada: {n}%. Objetivo: {t}%. ¡Sigue así!', vx: 'Analizando tu foto…',
-  ti: 'Fitpro — tu camino para ser un pro.', su: 'Elige tu idioma para empezar.', co: 'Continuar',
+  ti: 'sportyfit — tu camino para ser un pro.', su: 'Elige tu idioma para empezar.', co: 'Continuar',
   pr: 'Cuéntanos sobre ti', na: 'Nombre', ag: 'Edad', we: 'Peso (kg)', he: 'Altura (cm)', err: 'Completa todos los campos correctamente.',
   sc: 'Escanea tu físico', ss: 'Fotografía tu cuerpo para estimar tu nivel y tener una mejor experiencia.',
   cam: 'Tomar foto', lib: 'Elegir de la galería',
