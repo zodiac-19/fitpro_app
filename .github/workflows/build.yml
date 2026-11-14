@@ -135,11 +135,11 @@ jobs:
 
           const j = JSON.parse(fs.readFileSync('app.json', 'utf8'));
           const e = j.expo || (j.expo = {});
-          e.name = e.name || 'Fitpro';
-          e.slug = e.slug || 'fitpro';
+          e.name = e.name || 'sportyfit';
+          e.slug = e.slug || 'sportyfit';
           e.version = e.version || '1.0.0';
           e.orientation = 'portrait';
-          e.scheme = e.scheme || 'fitpro';
+          e.scheme = e.scheme || 'sportyfit';
           e.icon = './assets/icon.png';
           e.splash = { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#090A12' };
           e.android = e.android || {};
@@ -150,8 +150,8 @@ jobs:
           e.android.permissions = ['CAMERA'];
           e.plugins = (e.plugins || []).filter((p) => (Array.isArray(p) ? p[0] : p) !== 'expo-image-picker');
           e.plugins.push(['expo-image-picker', {
-            photosPermission: 'Fitpro needs your photos to analyze your physique and verify progress.',
-            cameraPermission: 'Fitpro needs the camera to scan your physique and verify progress.',
+            photosPermission: 'sportyfit needs your photos to analyze your physique and verify progress.',
+            cameraPermission: 'sportyfit needs the camera to scan your physique and verify progress.',
           }]);
           fs.writeFileSync('app.json', JSON.stringify(j, null, 2) + '\n');
 
@@ -217,6 +217,6 @@ jobs:
       - name: Upload the APK
         uses: actions/upload-artifact@v4
         with:
-          name: fitpro-apk
+          name: sportyfit-apk
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
